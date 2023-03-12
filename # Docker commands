@@ -1,0 +1,256 @@
+# Docker commands (Practise - https://kodekloud.com/topic/labs-docker-compose/)
+
+
+docker run nginx :
+Run a image if there is no instant local it will go to do0cker hub and pull the image and after that run it but after that it will use same in local for other instances
+
+
+docker ps :
+list all running containers with info (Running containers only not exit ones)
+
+
+docker ps -a :
+This will list all the running and non running containers 
+
+
+docker stop container-namer or container-Id :
+This will stop a running a container
+
+
+docker rm container-name : 
+remove the container 
+
+
+docker images :
+list all local images 
+
+
+docker rmi nginx :
+remove the image (need to delete all dependent containers)
+
+
+docker run ubuntu sleep 5 :
+normally docker runs the container what ever the process in it and after doing the process it exit, so what happens is after starting ubuntu it exit because there is no any other process in it :)
+
+
+docker exec  container-name cat /etc/hosts :
+execute something on the running container 
+
+
+docker run kodekloud/simple-webapp
+docker run -d kodekloud/simple-webapp :
+In here if we use run it will run the container by gaining the terminal and we are not able to use terminal until the process finish. '-d' means we are running the container in deattach mode so container will run in backgroung and we can interact with terminal 
+
+
+docker run -i kodekloud/simple-prompt-docker :
+when we use i tag it will run in interactive mode means we can give user inputs. otherwise it will not ask for input thus program have user inputs
+
+--------------------------------------------------------------------------
+
+docker run -p 803:5000 kodekloud/simple-webapp
+this will map the container port 5000 with the host port 803 so external users able to access by 803 port 
+
+
+docker run -v /opt/datadir:/var/lib/mysql mysql 
+by this we are maping the volume with the host volume by that if the container is gone volume will be persist 
+if not when we delete the container the data also be gone 
+
+
+docker logs container-name or id 
+This will show the logs thus we run the container in deattach mode 
+
+------------------------------------------------------------------------
+
+docker run -e APP_COLOR=blue simple-webapp-color 
+In here we are providing the environment variables with in the docker run containers 
+
+
+docker inspect blissful_hopper
+In here we can inspect the env variables for a running container
+
+-------------------------------------------------------------------------
+
+Docker image creation 
+
+1. OS - ubuntu
+2. update apt repo
+3. Install dependencies using pip
+4. Install python dependencies using pip
+5. Copy source code to /opt folder
+6. run the web server using flask command 
+
+
+# Dockerfile
+		Instruction     Argument    
+		FROM 			Ubuntu
+
+		RUN 			apt-get update
+		RUN 			apt-get install python
+
+		RUN 			pip install flask
+		RUN 			pip install flask-mysql
+
+		COPY 			. /opt/source-code        # In here what we say is to copy all in the current folder to docker /opt/source-code directry 
+		If we want to copy only a particuler file we can use the filename instead of . command 
+		ENTRYPOINT 		FLASK_APP=/opt/source-code/app.py flask run 
+
+docker build Dockerfile -t container-name :
+In here we are saying to build a image using the source file and by -t we say the name of the image 
+
+docker push container-name :
+By this we are able to push the custom inage to docker hub 
+
+
+--------------------------------------------------------------------------------
+
+Docker image  commands
+
+CMD what need to do when running the image
+
+	From Ubuntu
+	CMD sleep 5 or CMD ["sleep", "5"]
+
+	$ docker run ubuntu-sleeper
+
+ENTRYPOINT In here we say any variables comes with docker run is equals to theENTRYPOINT variable
+
+	FROM Ubuntu
+	ENTRYPOINT ["sleep"]
+
+	$ docker run ubuntu-sleeper 10 ----> this is some thing similer $ docker run ubuntu-sleeper sleep 10 
+
+	In here if we didnt pass any argument then it will give error because there is no any default value 
+
+	FROM Ubuntu
+	ENTRYPOINT ["sleep"]
+	CMD ["5"]
+
+	In here we can override 5 by $ docker run ubuntu-sleeper 10 else it will sleep 5 mins only
+
+	We can override Dockerfile entrypoint by --entrypoint 
+
+	FROM Ubuntu
+	ENTRYPOINT ["sleep"]
+	CMD ["5"]
+
+	$ docker run --entrypoint sleep2.0 ubuntu-sleeper 10  In here we use sleep2.0 not the one in dockerfile
+
+--------------------------------------------------------------------------------
+
+Docker network commands
+
+docker run ubuntu : By this container will get internal ip address and other containers are able to access this but external users are not able to access. So we have map external ports with internal ports in here 
+
+
+docker run Ubuntu --network=none : In here container is not ahaving internal or external host so internal containers or sytems doesnt have access as well as external users
+
+docker run Ubuntu --network=host :
+In here we are assigining the host ip directly to container external systems able to access 
+
+docker network create --driver bridge --subnet 182.18.0.0/16 customer-isolated-network : In here we create another isolated network 
+
+docker network ls : to see all the networks
+
+docker inspect container-name : give container networks and other details
+
+
+web container how to connect mysql server - mysql.connect(mysql) by this it will configure the network by using dns server which has all  the details of each containers (host name - Ip address ) DNS server runs default in 127.0.0.11 
+
+docker network inspecty bridge : To inspect details of anetwork such as subnet etc
+
+docker run -d -e MYSQL_ROOT_PASSWORD=db_pass123 --name mysql-db --network wp-mysql-network mysql:5.6 : Deploy a mysql database using the mysql:5.6 image and name it mysql-db. Attach it to the newly created network wp-mysql-network
+Set the database password to use db_pass123. The environment variable to set is MYSQL_ROOT_PASSWORD.
+
+
+docker run -d --name webapp -p 38080:8080 -e DB_Host=mysql-db -e DB_Password=db_pass123 --network=wp-mysql-network --link mysql-db:mysql-db  kodekloud/simple-webapp-mysql: run a webapp by connecting to mysql db
+
+------------------------------------------------------------------------------- 
+
+Docker storage 
+
+docker volume create data_volume : In here we add percistance volume to the container.  
+
+docker run -v data_volume: /var/lib/mysql mysql  - In here what happens is mysql container get the persistance data volume. In here even the container is destroyed still the data is active. 
+
+If we does run just docker run -v data_volume2: /var/lib/mysql mysql : In here we didnt create data_volume2 but it will create a volume and add it to mysql  the second container. 
+
+
+In docker we have 2 types of mounts volume mount and bind mount 
+
+previous we talk about volume mount volume is in /var/lib/docker/volumes so we say container this swpecific path has data where /var/lib/mysql 
+
+-------------------------
+
+
+docker run --mount type=bind, source=/data/mysql, target=/var/lib/mysql mysql : In here it is bind with location 
+
+
+Ques?
+
+What directory under /var/lib/docker are the files related to the container alpine-3 image stored? The directory name is the same as the container id.
+
+
+--------------------------------------------------------------------------------
+
+Docker compose 
+
+If we need to run multiple docker containers better to use docker-compose.yml
+
+docker-compose.yml
+
+services:
+	web:
+		image: "mmumshad/simple-webapp"
+	database:
+		image: "mongodb"
+	messaging:
+		image: "redis:alpine"
+	orchestration:
+		image: "ansible"
+
+docker-compose up : by this we can build entire application 
+
+--------------------------------------------------------------------------------
+
+Docker engine 
+
+
+Docker Engine :  Docker CLI (Command line interface we used so far)
+				 Rest API  (able to interact with deamon and provide instructions)
+				 Docker deamon (manage images, containers, volumes, networks)
+
+
+Namespace Isolation 
+
+
+if we need to restric the cpu usage : docker run --cpus=.5 ubuntu 
+if we need to restric the memory usage : docker run --memory=100m ubuntu 
+
+need to read more
+
+--------------------------------------------------------------------------------
+
+Container orchestraction 
+
+With the usage we need imporve the the container counts or decrease or create new hosts etc.
+For this we can use docker swarm, kubernetes, mesos 
+
+
+--------------------------------------------------------------------------------
+
+Docker swarm 
+
+We must have multiple docker hosts and we need to specify one as swarm manager and others as workers 
+
+swarm manager : docker swarm init (This will create swarm manager and you will see command to run workers)
+
+
+docker service create --replicas=3 my-web-server (This should be run on manager node) docker service create --replicas=3  --> this is equals to docker run and you can give any tag you need 
+
+
+-------------------------------------------------------------------------------
+
+Kubernetes
+
+kubectl run --replicas=1000 my-web-server (In kubernetes cluster)
+

@@ -1,0 +1,47 @@
+# check the docker is installed in the server 
+docker --version
+
+# Hello world
+docker run hello-world
+	1. The Docker client contacted the Docker daemon.
+ 	2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+       (arm64v8)
+ 	3. The Docker daemon created a new container from that image which runs the
+       executable that produces the output you are currently reading.
+ 	4. The Docker daemon streamed that output to the Docker client, which sent it
+       to your terminal.
+
+# check the running containers now
+docker ps
+
+# check the container we ran so far
+docker ps -a
+
+# check the images we have 
+docker image ls
+
+# remove docker image 
+# remove containers before removing the image 
+docker rm (container id) 
+docker rmi (imageid or name)
+
+# pull images
+docker image pull ubuntu
+
+# run ubuntu in current terminal (-it)
+docker run -it ubuntu /bin/bash
+
+# do what ever the things inside the container 
+
+# You need to create a image from the updates container
+docker commit container-name new-imagename:tag
+# in here it will create a image without name or tag you can see that by checking all the images
+docker images -a
+
+# now you can run the customized image by image-name 
+
+# push the image to docker hub
+docker login 
+docker push image-name
+
+
